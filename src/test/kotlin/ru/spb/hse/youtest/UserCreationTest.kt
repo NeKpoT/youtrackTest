@@ -20,14 +20,14 @@ class UserCreationTest {
     }
 
     @Test
-    fun basicCreateUser() {
+    fun `create user creates a user`() {
         val login = "d"
         connection.createUser("a", "b", "c", login, "e")
         assertHaveUser(login)
     }
 
     @Test
-    fun cantCreateUsersWithSameLogin() {
+    fun `can't create users with same login`() {
         connection.apply {
             createUser("a1", "a1", "a1", "samelogin", "password1")
             createUser("a2", "a2", "a2", "samelogin", "password2")
@@ -36,7 +36,7 @@ class UserCreationTest {
     }
 
     @Test
-    fun canCreateUsersWithSameEverythingExceptLogin() {
+    fun `can create users with same everything except login`() {
         connection.apply {
             createUser("a", "a", "a", "login1", "a")
             createUser("a", "a", "a", "login2", "a")
@@ -45,7 +45,7 @@ class UserCreationTest {
     }
 
     @Test
-    fun niceErrorWhenEmptyLogin() {
+    fun `nice error when empty login`() {
         connection.apply {
             createUser("name", "email", "jabber", "", "password")
             assertEquals(listOf("Login is required!"), getErrorTooltipsText())
@@ -54,7 +54,7 @@ class UserCreationTest {
     }
 
     @Test
-    fun niceErrorWhenEmptyPassword() {
+    fun `nice error when empty password`() {
         connection.apply {
             createUser("name", "email", "jabber", "login", "")
             assertEquals(listOf("Password is required!"), getErrorTooltipsText())
@@ -63,7 +63,7 @@ class UserCreationTest {
     }
 
     @Test
-    fun niceErrorWhenPasswordsDontMatch() {
+    fun `nice error when passwords don't match`() {
         connection.apply {
             createUser("name", "email", "jabber", "login", "p1", "p2")
             assertEquals(listOf("Password doesn't match!"), getErrorTooltipsText())
@@ -74,7 +74,7 @@ class UserCreationTest {
     // fails
     // it displays several error bulbs on user registration page, but seems to show only one at a time here...
     @Test
-    fun twoNiceErrorsWhenEmptyPasswordAndLogin() {
+    fun `two nice errors when empty password and login`() {
         connection.apply {
             createUser("name", "email", "jabber", "", "")
             assertEquals(listOf("Login is required!", "Password is required!"), getErrorTooltipsText())
@@ -84,7 +84,7 @@ class UserCreationTest {
 
     // fails
     @Test
-    fun twoNiceErrorsWhenEmptyLoginAndPasswordsDontMatch() {
+    fun `two nice errors when empty login and passwords don't match`() {
         connection.apply {
             createUser("name", "email", "jabber", "", "")
             assertEquals(listOf("Login is required!", "Password doesn't match!"), getErrorTooltipsText())
@@ -93,7 +93,7 @@ class UserCreationTest {
     }
 
     @Test
-    fun cantCreateUserIfSomebodyRegistredWithSameLogin() {
+    fun `cant create user if somebody registred with same login`() {
         connection.apply {
             register("", "", "login", "password")
             createUser("", "", "", "login", "password")
@@ -102,23 +102,34 @@ class UserCreationTest {
     }
 
     @Test
-    fun canCreateUserWithoutAdditionalInfo() {
+    fun `does not brake on long logins`() {
+        connection.apply {
+            register("", "", "a".repeat(50), "1")
+            assertTrue(getUsersLogins().any { it.startsWith("aaaaaa") })
+        }
+    }
+
+    @Test
+    fun `can create user without additional info`() {
         connection.createUser("", "", "", "login", "password")
         assertHaveUser("login")
     }
 
     @TestFactory
-    fun allowsWeirdSymbolsInLogin() = listOf(
+    fun `allows weird symbols in login`() = listOf(
         "!",
-        "@",
-        "#",
+        "`",
+        "}",
         "$",
         "%",
-        "^",
-        "*",
-        "(",
+        "'",
+        "\"",
+        ")",
+        ";",
         "-",
-        "+",
+        "\\",
+        "_",
+        "русскиебуквы",
         "@#$%^&*()"
     ).map {login ->
         DynamicTest.dynamicTest("Accepts login $login") {
@@ -128,10 +139,22 @@ class UserCreationTest {
         }
     }
 
+    @TestFactory
+    fun `does not allow to use space in login`() = listOf(
+        " 11",
+        "11 ",
+        "11 11"
+    ).map {login ->
+        DynamicTest.dynamicTest("Forbids login '$login'") {
+            connection.deleteEveryone()
+            connection.createUser("q", "w", "e", login, "password")
+            assertTrue(connection.getMessageErrorText().startsWith("Restricted character"))
+        }
+    }
+
+
     private fun assertHaveUser(login: String) {
-        val logins = connection.getUsersLogins()
-        println("$logins,   $login")
-        assertTrue(logins.contains(login))
+        assertTrue(connection.getUsersLogins().contains(login))
     }
 
     private fun assertDontHaveUser(login: String) {

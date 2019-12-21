@@ -84,6 +84,17 @@ class Connection(private val driver: ChromeDriver, private val rootPassword: Str
 }
 
 fun main(args: Array<String>) {
+    val s = "\t"
+    println(listOf(
+        " " to "space",
+        "\t" to "tab"
+    ).flatMap {(space, name) ->
+        listOf(
+            "${space}11",
+            "11${space}",
+            "11${space}11"
+        )})
+    return
     val driver = ChromeDriver()
     val connection = Connection(driver)
     connection.login("root", "root")
