@@ -84,32 +84,24 @@ class Connection(private val driver: ChromeDriver, private val rootPassword: Str
 }
 
 fun main(args: Array<String>) {
-    val s = "\t"
-    println(listOf(
-        " " to "space",
-        "\t" to "tab"
-    ).flatMap {(space, name) ->
-        listOf(
-            "${space}11",
-            "11${space}",
-            "11${space}11"
-        )})
-    return
     val driver = ChromeDriver()
     val connection = Connection(driver)
     connection.login("root", "root")
 //    Thread.sleep(1000)
-    connection.createUser("aa", "0", "", "aaqweq", "ewq")
-    connection.createUser("ab1", "0", "", "aaqweq2", "ewq")
-    connection.createUser("ab2", "0", "", "qw3eq", "ewq")
-    connection.createUser("ab21", "0", "", "qw22eq", "ewq")
-    connection.createUser("ab22", "0", "", "qw22eq3", "ewq")
-    connection.createUser("ab23", "0", "", "aqw22eq", "ewq")
-//    Thread.sleep(100)
-//    println(connection.getErrorTooltipsText())
-
+//    connection.createUser("aa", "0", "", "aaqweq", "ewq")
+//    connection.createUser("ab1", "0", "", "aaqweq2", "ewq")
+//    connection.createUser("ab2", "0", "", "qw3eq", "ewq")
+//    connection.createUser("ab21", "0", "", "qw22eq", "ewq")
+//    connection.createUser("ab22", "0", "", "qw22eq3", "ewq")
+//    connection.createUser("ab23", "0", "", "aqw22eq", "ewq")
+////    Thread.sleep(100)
+////    println(connection.getErrorTooltipsText())
+//
+    connection.apply {
+        createUser("", "", "", "a".repeat(100), "1")
+    }
     driver.get("http://localhost:8080/users")
-    Thread.sleep(100)
+    Thread.sleep(10000)
 //    driver.findElementsByCssSelector("a[cn='l.U.usersList.deleteUser']").forEach { println(it.text + "!") }
     connection.deleteEveryone()
     driver.close()
