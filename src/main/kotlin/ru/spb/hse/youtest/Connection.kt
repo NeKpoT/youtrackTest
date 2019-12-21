@@ -1,3 +1,5 @@
+package ru.spb.hse.youtest
+
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.interactions.Actions
