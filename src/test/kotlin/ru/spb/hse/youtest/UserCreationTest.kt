@@ -1,9 +1,7 @@
 package ru.spb.hse.youtest
 
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.openqa.selenium.chrome.ChromeDriver
 
 class UserCreationTest {
@@ -109,8 +107,31 @@ class UserCreationTest {
         assertHaveUser("login")
     }
 
+    @TestFactory
+    fun allowsWeirdSymbolsInLogin() = listOf(
+        "!",
+        "@",
+        "#",
+        "$",
+        "%",
+        "^",
+        "*",
+        "(",
+        "-",
+        "+",
+        "@#$%^&*()"
+    ).map {login ->
+        DynamicTest.dynamicTest("Accepts login $login") {
+            connection.deleteEveryone()
+            connection.createUser("q", "w", "e", login, "password")
+            assertHaveUser(login)
+        }
+    }
+
     private fun assertHaveUser(login: String) {
-        assertTrue(connection.getUsersLogins().contains(login))
+        val logins = connection.getUsersLogins()
+        println("$logins,   $login")
+        assertTrue(logins.contains(login))
     }
 
     private fun assertDontHaveUser(login: String) {
@@ -120,5 +141,4 @@ class UserCreationTest {
     private fun assertErrorLoginExists() {
         assertEquals("Value should be unique: login", connection.getMessageErrorText())
     }
-
 }

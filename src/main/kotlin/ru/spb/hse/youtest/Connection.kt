@@ -44,6 +44,7 @@ class Connection(private val driver: ChromeDriver, private val rootPassword: Str
             findElementById("id_l.U.cr.jabber").sendKeys(jabber)
             findElementById("id_l.U.cr.createUserOk").click()
         }
+        Thread.sleep(200) // seems to be the only way to wait until the user is actually created
     }
 
     fun deleteEveryone() {

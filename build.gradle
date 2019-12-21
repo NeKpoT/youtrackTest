@@ -19,6 +19,7 @@ dependencies {
     testCompile group: 'org.junit.platform', name: 'junit-platform-launcher', version: '1.4.0-M1'
     // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
     compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
 
 }
 
