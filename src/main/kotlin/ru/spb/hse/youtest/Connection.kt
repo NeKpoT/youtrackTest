@@ -1,6 +1,7 @@
 package ru.spb.hse.youtest
 
 import org.openqa.selenium.By
+import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.support.ui.ExpectedConditions
@@ -32,10 +33,10 @@ class Connection(private val driver: ChromeDriver, private val rootPassword: Str
     }
 
     fun createUser(name: String, email: String, jabber: String, login: String, password: String, confirmPassword: String? = null) {
+        loadUsersPage()
         driver.apply {
-            get("http://localhost:8080/users")
-            waitOne().until(ExpectedConditions.presenceOfElementLocated(By.id("id_l.U.createNewUser"))).click()
-            waitOne().until(ExpectedConditions.presenceOfElementLocated(By.id("id_l.U.cr.login"))).sendKeys(login)
+            waitElement(By.id("id_l.U.createNewUser")).click()
+            waitElement(By.id("id_l.U.cr.login")).sendKeys(login)
             findElementById("id_l.U.cr.password").sendKeys(password)
             findElementById("id_l.U.cr.confirmPassword").sendKeys(confirmPassword ?: password)
             findElementById("id_l.U.cr.fullName").sendKeys(name)
@@ -46,14 +47,22 @@ class Connection(private val driver: ChromeDriver, private val rootPassword: Str
     }
 
     fun deleteEveryone() {
-        driver.apply {
-            get("http://localhost:8080/users")
-            driver.findElementsByCssSelector("a[cn='l.U.usersList.deleteUser']").forEach {
-                it.click()
-                driver.switchTo().alert().accept()
-            }
+        loadUsersPage()
+        val userIDs = getRegularUsersEditLinks().map { it.getAttribute("p0") }
+        userIDs.forEach {
+            loadUsersPage()
+            waitElement(By.cssSelector("a[cn='l.U.usersList.deleteUser'][p0='$it']")).click()
+            wait().until(ExpectedConditions.alertIsPresent())
+            driver.switchTo().alert().accept()
         }
     }
+
+    fun getRegularUsersEditLinks(): List<WebElement> {
+        loadUsersPage()
+        return driver.findElementsByCssSelector("a[cn='l.U.usersList.UserLogin.editUser']").filter { it.text != "guest" && it.text != "root" }
+    }
+
+    fun getUsersLogins(): List<String> = getRegularUsersEditLinks().map { it.text }
 
     fun getErrorTooltipsText(): List<String> = driver.run {
         findElementsByClassName("error-bulb2").sortedBy { it.location.y }.map { bulb ->
@@ -62,7 +71,13 @@ class Connection(private val driver: ChromeDriver, private val rootPassword: Str
         }
     }
 
-    private fun waitOne() = WebDriverWait(driver, 1)
+    fun getMessageErrorText(): String = waitElement(By.className("errorSeverity")).text
+
+    private fun wait() = WebDriverWait(driver, 2)
+
+    private fun waitElement(locator: By): WebElement = wait().until(ExpectedConditions.presenceOfElementLocated(locator))
+
+    private fun loadUsersPage() = driver.get("http://localhost:8080/users")
 }
 
 fun main(args: Array<String>) {
@@ -70,7 +85,12 @@ fun main(args: Array<String>) {
     val connection = Connection(driver)
     connection.login("root", "root")
 //    Thread.sleep(1000)
-    connection.createUser("ab", "0", "", "qweq", "ewq")
+    connection.createUser("aa", "0", "", "aaqweq", "ewq")
+    connection.createUser("ab1", "0", "", "aaqweq2", "ewq")
+    connection.createUser("ab2", "0", "", "qw3eq", "ewq")
+    connection.createUser("ab21", "0", "", "qw22eq", "ewq")
+    connection.createUser("ab22", "0", "", "qw22eq3", "ewq")
+    connection.createUser("ab23", "0", "", "aqw22eq", "ewq")
 //    Thread.sleep(100)
 //    println(connection.getErrorTooltipsText())
 
