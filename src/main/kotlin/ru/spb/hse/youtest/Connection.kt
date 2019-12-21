@@ -65,7 +65,9 @@ class Connection(private val driver: ChromeDriver, private val rootPassword: Str
     fun getUsersLogins(): List<String> = getRegularUsersEditLinks().map { it.text }
 
     fun getErrorTooltipsText(): List<String> = driver.run {
-        findElementsByClassName("error-bulb2").sortedBy { it.location.y }.map { bulb ->
+        val bulbLocator = By.className("error-bulb2")
+        waitElement(bulbLocator)
+        findElements(bulbLocator).sortedBy { it.location.y }.map { bulb ->
             Actions(driver).moveToElement(bulb).build().perform()
             findElementsByClassName("error-tooltip").map { it.text }.first { it.isNotEmpty() }
         }
@@ -73,7 +75,7 @@ class Connection(private val driver: ChromeDriver, private val rootPassword: Str
 
     fun getMessageErrorText(): String = waitElement(By.className("errorSeverity")).text
 
-    private fun wait() = WebDriverWait(driver, 2)
+    private fun wait() = WebDriverWait(driver, 3)
 
     private fun waitElement(locator: By): WebElement = wait().until(ExpectedConditions.presenceOfElementLocated(locator))
 
