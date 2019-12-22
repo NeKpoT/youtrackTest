@@ -47,8 +47,13 @@ class Connection(private val driver: ChromeDriver, private val rootPassword: Str
             findElementById("id_l.U.cr.jabber").sendKeys(jabber)
             findElementById("id_l.U.cr.createUserOk").click()
         }
-        Thread.sleep(200) // seems to be the only way to wait until the user is actually created
         return loginInTextField
+    }
+
+    fun createUserSuccessfully(name: String, email: String, jabber: String, login: String, password: String, confirmPassword: String? = null): String {
+        val createdLogin = createUser(name, email, jabber, login, password, confirmPassword)
+        wait().until(ExpectedConditions.urlContains("/editUser/"))
+        return createdLogin
     }
 
     fun deleteEveryone() {

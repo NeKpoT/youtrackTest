@@ -22,7 +22,7 @@ class UserCreationTest {
     @Test
     fun `create user creates a user`() {
         val login = "d"
-        connection.createUser("a", "b", "c", login, "e")
+        connection.createUserSuccessfully("a", "b", "c", login, "e")
         assertHaveUser(login)
     }
 
@@ -39,8 +39,7 @@ class UserCreationTest {
     fun `can create users with same everything except login`() {
         connection.apply {
             createUser("a", "a", "a", "login1", "a")
-            createUser("a", "a", "a", "login2", "a")
-
+            createUserSuccessfully("a", "a", "a", "login2", "a")
         }
     }
 
@@ -104,14 +103,14 @@ class UserCreationTest {
     @Test
     fun `does not brake on long logins`() {
         connection.apply {
-            val allowedLogin = createUser("", "", "", "a".repeat(100), "1")
+            val allowedLogin = createUserSuccessfully("", "", "", "a".repeat(100), "1")
             assertTrue(getUsersLogins().contains(allowedLogin))
         }
     }
 
     @Test
     fun `can create user without additional info`() {
-        connection.createUser("", "", "", "login", "password")
+        connection.createUserSuccessfully("", "", "", "login", "password")
         assertHaveUser("login")
     }
 
@@ -134,7 +133,7 @@ class UserCreationTest {
     ).map {login ->
         DynamicTest.dynamicTest("Accepts login $login") {
             connection.deleteEveryone()
-            connection.createUser("q", "w", "e", login, "password")
+            connection.createUserSuccessfully("q", "w", "e", login, "password")
             assertHaveUser(login)
         }
     }
