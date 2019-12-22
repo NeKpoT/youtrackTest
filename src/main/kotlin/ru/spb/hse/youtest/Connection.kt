@@ -32,11 +32,14 @@ class Connection(private val driver: ChromeDriver, private val rootPassword: Str
         }
     }
 
-    fun createUser(name: String, email: String, jabber: String, login: String, password: String, confirmPassword: String? = null) {
+    fun createUser(name: String, email: String, jabber: String, login: String, password: String, confirmPassword: String? = null): String {
         loadUsersPage()
+        val loginInTextField: String
         driver.apply {
             waitElement(By.id("id_l.U.createNewUser")).click()
-            waitElement(By.id("id_l.U.cr.login")).sendKeys(login)
+            val inputLoginTextField = waitElement(By.id("id_l.U.cr.login"))
+            inputLoginTextField.sendKeys(login)
+            loginInTextField = inputLoginTextField.getAttribute("value")
             findElementById("id_l.U.cr.password").sendKeys(password)
             findElementById("id_l.U.cr.confirmPassword").sendKeys(confirmPassword ?: password)
             findElementById("id_l.U.cr.fullName").sendKeys(name)
@@ -45,6 +48,7 @@ class Connection(private val driver: ChromeDriver, private val rootPassword: Str
             findElementById("id_l.U.cr.createUserOk").click()
         }
         Thread.sleep(200) // seems to be the only way to wait until the user is actually created
+        return loginInTextField
     }
 
     fun deleteEveryone() {
@@ -98,10 +102,13 @@ fun main(args: Array<String>) {
 ////    println(connection.getErrorTooltipsText())
 //
     connection.apply {
-        createUser("", "", "", "a".repeat(100), "1")
+        val login = "a".repeat(100)
+        createUser("", "", "", login, "1")
+        println(login)
+        println("^login")
     }
     driver.get("http://localhost:8080/users")
-    Thread.sleep(10000)
+    Thread.sleep(1000)
 //    driver.findElementsByCssSelector("a[cn='l.U.usersList.deleteUser']").forEach { println(it.text + "!") }
     connection.deleteEveryone()
     driver.close()

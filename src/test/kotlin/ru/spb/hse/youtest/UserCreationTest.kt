@@ -104,8 +104,8 @@ class UserCreationTest {
     @Test
     fun `does not brake on long logins`() {
         connection.apply {
-            createUser("", "", "", "a".repeat(100), "1")
-            assertTrue(getUsersLogins().any { it.startsWith("aaaaaa") })
+            val allowedLogin = createUser("", "", "", "a".repeat(100), "1")
+            assertTrue(getUsersLogins().contains(allowedLogin))
         }
     }
 
